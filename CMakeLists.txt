@@ -15,7 +15,7 @@ ELSE()
    PROJECT( find_object_2d )
 ENDIF()
 
-# Catkin doesn't support multiarch library path, 
+# Catkin doesn't support multiarch library path,
 # fix to "lib" if not set by user.
 IF(NOT DEFINED CMAKE_INSTALL_LIBDIR)
    set(CMAKE_INSTALL_LIBDIR "lib")
@@ -53,7 +53,10 @@ ADD_DEFINITIONS(-DPROJECT_VERSION="${PROJECT_VERSION}")
 ADD_DEFINITIONS(-DPROJECT_NAME="${PROJECT_NAME}")
 
 ####### DEPENDENCIES #######
-FIND_PACKAGE(OpenCV REQUIRED) # tested on 2.3.1
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+FIND_PACKAGE(OpenCV 4.2 REQUIRED) # tested on 2.3.1
 
 # check if version status is "-dev" (SIFT compatibility issue between 4.3.0 vs 4.3.0-dev)
 FIND_FILE(OpenCV_VERSION_HPP opencv2/core/version.hpp
@@ -103,7 +106,7 @@ SET(NONFREE 1)
 IF(NOT (OPENCV_NONFREE_FOUND OR OPENCV_XFEATURES2D_FOUND))
    SET(NONFREE 0)
 ELSEIF(OpenCV_VERSION VERSION_GREATER "3.4.2")
-  FIND_FILE(OpenCV_MODULES_HPP opencv2/opencv_modules.hpp 
+  FIND_FILE(OpenCV_MODULES_HPP opencv2/opencv_modules.hpp
     PATHS ${OpenCV_INCLUDE_DIRS}
     NO_DEFAULT_PATH)
   FILE(READ ${OpenCV_MODULES_HPP} TMPTXT)
@@ -153,22 +156,22 @@ IF(NOT CATKIN_BUILD)
    endif()
    set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH
      "Installation directory for CMake files")
-   
+
 
    ####### OSX BUNDLE CMAKE_INSTALL_PREFIX #######
    IF(APPLE)
       OPTION(BUILD_AS_BUNDLE "Set to ON to build as bundle (DragNDrop)" OFF)
    ENDIF(APPLE)
-   IF(APPLE AND BUILD_AS_BUNDLE) 
+   IF(APPLE AND BUILD_AS_BUNDLE)
        # Required when packaging, and set CMAKE_INSTALL_PREFIX to "/".
-       SET(CPACK_SET_DESTDIR TRUE) 
-     
+       SET(CPACK_SET_DESTDIR TRUE)
+
        SET(CMAKE_BUNDLE_NAME
          "${PROJECT_NAME}")
        SET(CMAKE_BUNDLE_LOCATION "/")
-       
+
        # make sure CMAKE_INSTALL_PREFIX ends in /
-       SET(CMAKE_INSTALL_PREFIX 
+       SET(CMAKE_INSTALL_PREFIX
          "/${CMAKE_BUNDLE_NAME}.app/Contents")
    ENDIF(APPLE AND BUILD_AS_BUNDLE)
 
@@ -197,19 +200,19 @@ IF(NOT CATKIN_BUILD)
    # Create the FindObjectConfig.cmake and FindObjectConfigVersion files
    file(RELATIVE_PATH REL_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_CMAKE_DIR}" "${CMAKE_INSTALL_PREFIX}/${INSTALL_INCLUDE_DIR}")
    file(RELATIVE_PATH REL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/${INSTALL_CMAKE_DIR}" "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-      
+
    # ... for the build tree
    set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include")
    set(CONF_LIB_DIR "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
    configure_file(FindObjectConfig.cmake.in
      "${PROJECT_BINARY_DIR}/FindObjectConfig.cmake" @ONLY)
-     
+
    # ... for the install tree
    set(CONF_INCLUDE_DIRS "\${FindObject_CMAKE_DIR}/${REL_INCLUDE_DIR}")
    set(CONF_LIB_DIR "\${FindObject_CMAKE_DIR}/${REL_LIB_DIR}")
    configure_file(FindObjectConfig.cmake.in
      "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FindObjectConfig.cmake" @ONLY)
-     
+
    # ... for both
    configure_file(FindObjectConfigVersion.cmake.in
      "${PROJECT_BINARY_DIR}/FindObjectConfigVersion.cmake" @ONLY)
@@ -234,10 +237,10 @@ IF(NOT CATKIN_BUILD)
    SET(CPACK_PACKAGE_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
    SET(CPACK_PACKAGE_CONTACT "matlabbe@gmail.com")
 
-   set(CPACK_SOURCE_IGNORE_FILES 
-     "\\\\.svn/" 
-     "${PROJECT_SOURCE_DIR}/build/[a-zA-Z0-9_]+" 
-     "~$" 
+   set(CPACK_SOURCE_IGNORE_FILES
+     "\\\\.svn/"
+     "${PROJECT_SOURCE_DIR}/build/[a-zA-Z0-9_]+"
+     "~$"
      "${PROJECT_SOURCE_DIR}/bin/.*${PROJECT_PREFIX}"
      "${PROJECT_SOURCE_DIR}/bin/.*${PROJECT_NAME}"
      "\\\\.DS_Store"
@@ -245,10 +248,10 @@ IF(NOT CATKIN_BUILD)
 
    IF(WIN32)
      SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/LICENSE")
-     IF(CMAKE_CL_64) 
-       SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64") 
-     ELSE() 
-       SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES") 
+     IF(CMAKE_CL_64)
+       SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
+     ELSE()
+       SET(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES")
      ENDIF()
      SET(CPACK_GENERATOR "ZIP;NSIS")
      SET(CPACK_SOURCE_GENERATOR "ZIP")
@@ -260,19 +263,19 @@ IF(NOT CATKIN_BUILD)
      SET(CPACK_NSIS_CONTACT ${CPACK_PACKAGE_CONTACT})
      # Set the icon used for the Windows "Add or Remove Programs" tool.
      SET(CPACK_NSIS_INSTALLED_ICON_NAME bin\\\\${PROJECT_NAME}.exe)
-     SET(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}" "${PROJECT_NAME}" ${CPACK_PACKAGE_EXECUTABLES}) 
-     SET(CPACK_CREATE_DESKTOP_LINKS "${PROJECT_NAME}" ${CPACK_CREATE_DESKTOP_LINKS}) 
+     SET(CPACK_PACKAGE_EXECUTABLES "${PROJECT_NAME}" "${PROJECT_NAME}" ${CPACK_PACKAGE_EXECUTABLES})
+     SET(CPACK_CREATE_DESKTOP_LINKS "${PROJECT_NAME}" ${CPACK_CREATE_DESKTOP_LINKS})
      SET(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME}")
    ELSEIF(APPLE)
      IF(BUILD_AS_BUNDLE)
-       # On APPLE and if BUILD_AS_BUNDLE=ON, the project is created as a bundle 
-       # over the main app (see ./src).Here we package only this bundle. Note 
+       # On APPLE and if BUILD_AS_BUNDLE=ON, the project is created as a bundle
+       # over the main app (see ./src).Here we package only this bundle. Note
        # that we set CMAKE_INSTALL_PREFIX to "/" when packaging to DragNDrop...
        SET(CPACK_GENERATOR "DragNDrop")
      ELSE()
        SET(CPACK_GENERATOR "PackageMaker;TBZ2")
      ENDIF()
-     
+
      SET(CPACK_SOURCE_GENERATOR "TBZ2")
 
      SET(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/app/${PROJECT_NAME}.icns")
@@ -290,7 +293,7 @@ IF(NOT CATKIN_BUILD)
    MESSAGE(STATUS "  CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
    MESSAGE(STATUS "  CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
    MESSAGE(STATUS "  PROJECT_VERSION = ${PROJECT_VERSION}")
- 
+
    IF(OpenCV_VERSION_MAJOR EQUAL 2)
      IF(OPENCV_NONFREE_FOUND)
        MESSAGE(STATUS "  With OpenCV 2 nonfree module (SIFT/SURF) = YES")
@@ -331,7 +334,7 @@ IF(NOT CATKIN_BUILD)
    ELSE()
       MESSAGE(STATUS "  With tcmalloc = NO (tcmalloc not found)")
    ENDIF(Tcmalloc_FOUND)
-   
+
    IF(TORCH_FOUND)
       MESSAGE(STATUS "  With Torch = YES")
    ELSE()
@@ -349,7 +352,7 @@ ELSE()
    ## Find catkin macros and libraries
    ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
    ## is used, also find other catkin packages
-   find_package(catkin REQUIRED COMPONENTS 
+   find_package(catkin REQUIRED COMPONENTS
            cv_bridge roscpp rospy sensor_msgs std_msgs image_transport message_filters tf message_generation
    )
 
@@ -397,4 +400,3 @@ ELSE()
       DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
    )
 ENDIF()
-
